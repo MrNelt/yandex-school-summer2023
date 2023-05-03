@@ -1,11 +1,17 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/datatypes"
+)
 
 type Courier struct {
-	ID string `json:"id" query:"id"`
+	CourierID    int64    `json:"courier_id"`
+	CourierType  string   `json:"courier_type"`
+	Regions      []int    `json:"regions"`
+	WorkingHours []string `json:"working_hours"`
 }
 
-type Test struct {
-	gorm.Model
+type CourierDB struct {
+	ID         int64 `gorm:"primaryKey"`
+	Attributes datatypes.JSON
 }
