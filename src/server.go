@@ -3,12 +3,7 @@ package main
 import (
 	"github.com/labstack/echo/v4"
 	"yandex-team.ru/bstask/routes"
-	"yandex-team.ru/bstask/storage"
 )
-
-func init() {
-	storage.Init()
-}
 
 func main() {
 	e := setupServer()

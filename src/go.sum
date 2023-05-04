@@ -1,3 +1,5 @@
+github.com/bearatol/lg v1.3.0 h1:SLvjqA0P/ZbVZS0oldr+9xiR5oY3NrR6MeUBi9EHmNI=
+github.com/bearatol/lg v1.3.0/go.mod h1:X/V4cw+NWpIAbwn9peCsN6k58QyZIJeRVJVsUOLXGvY=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

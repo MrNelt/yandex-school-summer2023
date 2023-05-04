@@ -28,11 +28,10 @@ func NewPgStorage(dsl string) (*PgStorage, error) {
 	return &PgStorage{db}, nil
 }
 
-func (p *PgStorage) createCourier(courier ...models.Courier) error {
+func (p *PgStorage) CreateCourier(courier ...models.Courier) error {
 	db := p.db
 	tx := db.Begin()
 	for _, v := range courier {
-		log.Print(v)
 		courierJson, errJs := json.Marshal(v)
 		if errJs != nil {
 			return errJs
@@ -47,7 +46,7 @@ func (p *PgStorage) createCourier(courier ...models.Courier) error {
 	return nil
 }
 
-func (p *PgStorage) getCourierByID(ID int64) (models.Courier, error) {
+func (p *PgStorage) GetCourierByID(ID int64) (models.Courier, error) {
 	db := p.db
 	courierDB := models.CourierDB{}
 	if result := db.First(&courierDB, ID); result.Error != nil {
@@ -60,11 +59,23 @@ func (p *PgStorage) getCourierByID(ID int64) (models.Courier, error) {
 	return courier, nil
 }
 
-func (p *PgStorage) getCouriers(limit, offset int) ([]models.Courier, error) {
-	return []models.Courier{}, nil
+func (p *PgStorage) GetCouriers(limit, offset int) ([]models.Courier, error) {
+	db := p.db
+	var couriersDB []models.CourierDB
+	var couriers []models.Courier
+	db.Limit(limit).Offset(offset).Find(&couriersDB)
+	for _, courierDB := range couriersDB {
+		courier := models.Courier{}
+		err := json.Unmarshal(courierDB.Attributes, &courier)
+		if err != nil {
+			return nil, err
+		}
+		couriers = append(couriers, courier)
+	}
+	return couriers, nil
 }
 
-func (p *PgStorage) deleteCourierByID(ID ...int64) error {
+func (p *PgStorage) DeleteCourierByID(ID ...int64) error {
 	db := p.db
 	tx := db.Begin()
 	for _, id := range ID {

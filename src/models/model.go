@@ -11,6 +11,13 @@ type Courier struct {
 	WorkingHours []string `json:"working_hours"`
 }
 
+type Order struct {
+	Weight        int      `json:"weight"`
+	Regions       int      `json:"regions"`
+	DeliveryHours []string `json:"delivery_hours"`
+	Cost          int      `json:"cost"`
+}
+
 type CourierDB struct {
 	ID         int64 `gorm:"primaryKey"`
 	Attributes datatypes.JSON

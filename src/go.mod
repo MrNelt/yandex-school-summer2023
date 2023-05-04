@@ -10,6 +10,7 @@ require (
 )
 
 require (
+	github.com/bearatol/lg v1.3.0 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
