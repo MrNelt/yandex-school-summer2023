@@ -12,6 +12,7 @@ type Courier struct {
 }
 
 type Order struct {
+	OrderID       int64    `json:"order_id"`
 	Weight        int      `json:"weight"`
 	Regions       int      `json:"regions"`
 	DeliveryHours []string `json:"delivery_hours"`
