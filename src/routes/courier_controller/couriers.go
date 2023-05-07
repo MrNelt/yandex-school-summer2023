@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 	"yandex-team.ru/bstask/models"
+	"yandex-team.ru/bstask/utils"
 )
 
 type Storage interface {
@@ -16,6 +17,7 @@ type Storage interface {
 	GetCourierByID(ID int64) (models.Courier, error)
 	GetCouriers(limit, offset int) ([]models.Courier, error)
 	DeleteCourierByID(ID ...int64) error
+	CalculateRatingCourier(ID int64, startDate, endDate time.Time) (models.Courier, int32, int32, error)
 }
 
 type CourierControllerHandler struct {
@@ -25,16 +27,6 @@ type CourierControllerHandler struct {
 func NewCourierControllerHandler(s Storage) *CourierControllerHandler {
 	return &CourierControllerHandler{storage: s}
 }
-
-// @Summary create couriers
-// @Tags courier-controller
-// @Description create couriers
-// @Accept  json
-// @Produce  json
-// @Param input body query true "couriers info"
-// @Success 200 {object} query
-// @Failure 400 {string] string
-// @Router /couriers [post]
 
 func (c *CourierControllerHandler) CreateCouriers(ctx echo.Context) error {
 	rand.Seed(time.Now().UnixNano())
@@ -123,4 +115,45 @@ func (c *CourierControllerHandler) DeleteCourierByID(ctx echo.Context) error {
 		return ctx.String(http.StatusBadRequest, errDel.Error())
 	}
 	return ctx.NoContent(http.StatusOK)
+}
+
+func (c *CourierControllerHandler) CalculateRatingCourier(ctx echo.Context) error {
+	log.Info(ctx.Param("id"))
+	id, errParse := strconv.ParseInt(ctx.Param("id"), 10, 64)
+	if errParse != nil {
+		log.Error(errParse)
+		return ctx.String(http.StatusBadRequest, errParse.Error())
+	}
+	startDateStr := ctx.QueryParam("startDate")
+	endDateStr := ctx.QueryParam("endDate")
+	startDate, errStart := utils.GetTime(startDateStr)
+	if errStart != nil {
+		log.Error(errStart)
+		return ctx.String(http.StatusBadRequest, errStart.Error())
+	}
+	endDate, errEnd := utils.GetTime(endDateStr)
+	if errEnd != nil {
+		log.Error(errEnd)
+		return ctx.String(http.StatusBadRequest, errEnd.Error())
+	}
+	courier, rating, earning, errOperation := c.storage.CalculateRatingCourier(id, startDate, endDate)
+	if errOperation != nil {
+		log.Error(errEnd)
+		return ctx.String(http.StatusBadRequest, errOperation.Error())
+	}
+	type answerJson struct {
+		CourierId    int64    `json:"courier_id"`
+		CourierType  string   `json:"courier_type"`
+		Regions      []int    `json:"regions"`
+		WorkingHours []string `json:"working_hours"`
+		Rating       int32    `json:"rating"`
+		Earnings     int32    `json:"earnings"`
+	}
+	return ctx.JSON(http.StatusOK, answerJson{
+		CourierId:    courier.CourierID,
+		CourierType:  courier.CourierType,
+		Regions:      courier.Regions,
+		WorkingHours: courier.WorkingHours,
+		Rating:       rating,
+		Earnings:     earning})
 }

@@ -1,9 +1,0 @@
-basePath: /
-host: localhost:8000
-info:
-  contact: {}
-  description: API Server for Yandex Lavka
-  title: Yandex Lavka
-  version: "1.0"
-paths: {}
-swagger: "2.0"
