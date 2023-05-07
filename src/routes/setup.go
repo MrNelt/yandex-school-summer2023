@@ -3,6 +3,7 @@ package routes
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 	"os"
 	"yandex-team.ru/bstask/routes/courier_controller"
@@ -23,6 +24,8 @@ func SetupRoutes(e *echo.Echo) {
 	if err != nil {
 		log.Panic(err)
 	}
+
+	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(10)))
 
 	e.GET("/ping", ping)
 
