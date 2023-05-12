@@ -1,9 +1,9 @@
-package storage
+package service
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/labstack/gommon/log"
+	log "github.com/bearatol/lg"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"time"
@@ -11,26 +11,27 @@ import (
 	"yandex-team.ru/bstask/utils"
 )
 
-type PgStorage struct {
+type PgService struct {
 	db *gorm.DB
 }
 
-func NewPgStorage(dsl string) (*PgStorage, error) {
-	db, err := gorm.Open(postgres.Open(dsl), &gorm.Config{})
+func NewPgService(dsn string) (*PgService, error) {
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	for err != nil {
 		log.Info("Trying to connect to pg")
 		time.Sleep(2 * time.Second)
-		db, err = gorm.Open(postgres.Open(dsl), &gorm.Config{})
+		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	}
 	log.Info("Success connecting to pg")
+	// restrictions on the task
 	err = db.AutoMigrate(&models.CourierDB{}, &models.OrderDB{}, &models.CompleteInfo{})
 	if err != nil {
 		return nil, err
 	}
-	return &PgStorage{db}, nil
+	return &PgService{db}, nil
 }
 
-func (p *PgStorage) CreateCourier(courier ...models.Courier) error {
+func (p *PgService) CreateCourier(courier ...models.Courier) error {
 	db := p.db
 	tx := db.Begin()
 	for _, v := range courier {
@@ -48,7 +49,7 @@ func (p *PgStorage) CreateCourier(courier ...models.Courier) error {
 	return nil
 }
 
-func (p *PgStorage) GetCourierByID(ID int64) (models.Courier, error) {
+func (p *PgService) GetCourierByID(ID int64) (models.Courier, error) {
 	db := p.db
 	courierDB := models.CourierDB{}
 	if result := db.Limit(1).Find(&courierDB, ID); result.RowsAffected == 0 {
@@ -61,7 +62,7 @@ func (p *PgStorage) GetCourierByID(ID int64) (models.Courier, error) {
 	return courier, nil
 }
 
-func (p *PgStorage) GetCouriers(limit, offset int) ([]models.Courier, error) {
+func (p *PgService) GetCouriers(limit, offset int) ([]models.Courier, error) {
 	db := p.db
 	var couriersDB []models.CourierDB
 	var couriers []models.Courier
@@ -77,7 +78,7 @@ func (p *PgStorage) GetCouriers(limit, offset int) ([]models.Courier, error) {
 	return couriers, nil
 }
 
-func (p *PgStorage) DeleteCourierByID(ID ...int64) error {
+func (p *PgService) DeleteCourierByID(ID ...int64) error {
 	db := p.db
 	tx := db.Begin()
 	for _, id := range ID {
@@ -91,7 +92,7 @@ func (p *PgStorage) DeleteCourierByID(ID ...int64) error {
 	return nil
 }
 
-func (p *PgStorage) CreateOrder(order ...models.Order) error {
+func (p *PgService) CreateOrder(order ...models.Order) error {
 	db := p.db
 	tx := db.Begin()
 	for _, v := range order {
@@ -109,7 +110,7 @@ func (p *PgStorage) CreateOrder(order ...models.Order) error {
 	return nil
 }
 
-func (p *PgStorage) GetOrderByID(ID int64) (models.Order, error) {
+func (p *PgService) GetOrderByID(ID int64) (models.Order, error) {
 	db := p.db
 	orderDB := models.OrderDB{}
 	if result := db.Limit(1).Find(&orderDB, ID); result.RowsAffected == 0 {
@@ -122,7 +123,7 @@ func (p *PgStorage) GetOrderByID(ID int64) (models.Order, error) {
 	return order, nil
 }
 
-func (p *PgStorage) GetOrders(limit, offset int) ([]models.Order, error) {
+func (p *PgService) GetOrders(limit, offset int) ([]models.Order, error) {
 	db := p.db
 	var ordersDB []models.OrderDB
 	var orders []models.Order
@@ -140,7 +141,7 @@ func (p *PgStorage) GetOrders(limit, offset int) ([]models.Order, error) {
 	return orders, nil
 }
 
-func (p *PgStorage) DeleteOrderByID(ID ...int64) error {
+func (p *PgService) DeleteOrderByID(ID ...int64) error {
 	db := p.db
 	tx := db.Begin()
 	for _, id := range ID {
@@ -154,7 +155,7 @@ func (p *PgStorage) DeleteOrderByID(ID ...int64) error {
 	return nil
 }
 
-func (p *PgStorage) CreateCompleteInfo(info ...models.CompleteInfo) ([]models.Order, error) {
+func (p *PgService) CreateCompleteInfo(info ...models.CompleteInfo) ([]models.Order, error) {
 	db := p.db
 	tx := db.Begin()
 	var orders []models.Order
@@ -200,7 +201,7 @@ func (p *PgStorage) CreateCompleteInfo(info ...models.CompleteInfo) ([]models.Or
 	return orders, nil
 }
 
-func (p *PgStorage) GetOrdersComplete(limit, offset int) ([]models.CompleteInfo, error) {
+func (p *PgService) GetOrdersComplete(limit, offset int) ([]models.CompleteInfo, error) {
 	db := p.db
 	var info []models.CompleteInfo
 	if result := db.Limit(limit).Offset(offset).Find(&info); result.Error != nil {
@@ -209,7 +210,7 @@ func (p *PgStorage) GetOrdersComplete(limit, offset int) ([]models.CompleteInfo,
 	return info, nil
 }
 
-func (p *PgStorage) GetOrderCompleteByID(ID int64) (models.CompleteInfo, error) {
+func (p *PgService) GetOrderCompleteByID(ID int64) (models.CompleteInfo, error) {
 	db := p.db
 	completeInfo := models.CompleteInfo{}
 	if result := db.First(&completeInfo, ID); result.Error != nil {
@@ -218,7 +219,7 @@ func (p *PgStorage) GetOrderCompleteByID(ID int64) (models.CompleteInfo, error) 
 	return completeInfo, nil
 }
 
-func (p *PgStorage) CalculateRatingCourier(ID int64, startDate, endDate time.Time) (models.Courier, int32, int32, error) {
+func (p *PgService) CalculateRatingCourier(ID int64, startDate, endDate time.Time) (models.Courier, int32, int32, error) {
 	db := p.db
 	courier, err := p.GetCourierByID(ID)
 	var cfEarning int32 = 0

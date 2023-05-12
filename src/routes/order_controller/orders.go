@@ -12,7 +12,7 @@ import (
 	"yandex-team.ru/bstask/utils"
 )
 
-type Storage interface {
+type OrderService interface {
 	CreateOrder(courier ...models.Order) error
 	GetOrderByID(ID int64) (models.Order, error)
 	GetOrders(limit, offset int) ([]models.Order, error)
@@ -22,11 +22,11 @@ type Storage interface {
 }
 
 type OrderControllerHandler struct {
-	storage Storage
+	service OrderService
 }
 
-func NewOrderControllerHandler(s Storage) *OrderControllerHandler {
-	return &OrderControllerHandler{storage: s}
+func NewOrderControllerHandler(s OrderService) *OrderControllerHandler {
+	return &OrderControllerHandler{service: s}
 }
 
 func (c *OrderControllerHandler) CreateOrders(ctx echo.Context) error {
@@ -46,7 +46,7 @@ func (c *OrderControllerHandler) CreateOrders(ctx echo.Context) error {
 			orders.Orders[i].OrderID = rand.Int63n(math.MaxInt64)
 		}
 	}
-	errOperation := c.storage.CreateOrder(orders.Orders...)
+	errOperation := c.service.CreateOrder(orders.Orders...)
 	if errOperation != nil {
 		log.Error(errOperation)
 		return ctx.String(http.StatusBadRequest, errOperation.Error())
@@ -60,7 +60,7 @@ func (c *OrderControllerHandler) GetOrderByID(ctx echo.Context) error {
 		log.Error(errParse)
 		return ctx.String(http.StatusBadRequest, errParse.Error())
 	}
-	order, errOperation := c.storage.GetOrderByID(id)
+	order, errOperation := c.service.GetOrderByID(id)
 	if errOperation != nil {
 		log.Error(errOperation)
 		return ctx.String(http.StatusNotFound, errOperation.Error())
@@ -89,7 +89,7 @@ func (c *OrderControllerHandler) GetOrders(ctx echo.Context) error {
 		log.Error(errOffset)
 		return ctx.String(http.StatusBadRequest, errOffset.Error())
 	}
-	orders, errOperation := c.storage.GetOrders(limit, offset)
+	orders, errOperation := c.service.GetOrders(limit, offset)
 	if errOperation != nil {
 		log.Error(errOperation)
 		return ctx.String(http.StatusBadRequest, errOperation.Error())
@@ -110,7 +110,7 @@ func (c *OrderControllerHandler) DeleteOrderByID(ctx echo.Context) error {
 		log.Error(errParse)
 		return ctx.String(http.StatusBadRequest, errParse.Error())
 	}
-	errDel := c.storage.DeleteOrderByID(id)
+	errDel := c.service.DeleteOrderByID(id)
 	if errDel != nil {
 		log.Error(errDel)
 		return ctx.String(http.StatusBadRequest, errDel.Error())
@@ -136,7 +136,7 @@ func (c *OrderControllerHandler) CompleteOrder(ctx echo.Context) error {
 		}
 
 	}
-	orders, errOperation := c.storage.CreateCompleteInfo(completeInfo.CompleteInfo...)
+	orders, errOperation := c.service.CreateCompleteInfo(completeInfo.CompleteInfo...)
 	if errOperation != nil {
 		log.Error(errOperation)
 		return ctx.String(http.StatusBadRequest, errOperation.Error())
@@ -164,7 +164,7 @@ func (c *OrderControllerHandler) GetOrdersComplete(ctx echo.Context) error {
 		log.Error(errOffset)
 		return ctx.String(http.StatusBadRequest, errOffset.Error())
 	}
-	ordersComplete, errOperation := c.storage.GetOrdersComplete(limit, offset)
+	ordersComplete, errOperation := c.service.GetOrdersComplete(limit, offset)
 	if errOperation != nil {
 		log.Error(errOperation)
 		return ctx.String(http.StatusBadRequest, errOperation.Error())

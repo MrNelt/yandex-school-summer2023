@@ -15,30 +15,15 @@ services:
       - db
     networks:
       - enrollment
-    env_file:
-      - .env
 
   db:
     container_name: db
     image: postgres:15.2-alpine
-    env_file:
-      - .env
-    ports:
-      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=password
     networks:
       - enrollment
-  tests:
-      image: golang:1.20-alpine
-      volumes:
-        - ./tests:/code
-      working_dir: /code
-      environment:
-        host: "http://app:8080"
-      links:
-        - app
-      networks:
-        - enrollment
-      command: /bin/sh -c "go mod tidy && go test -v"
+
 
 networks:
   enrollment:

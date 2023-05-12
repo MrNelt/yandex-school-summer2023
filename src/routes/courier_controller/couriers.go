@@ -12,7 +12,7 @@ import (
 	"yandex-team.ru/bstask/utils"
 )
 
-type Storage interface {
+type CourierService interface {
 	CreateCourier(courier ...models.Courier) error
 	GetCourierByID(ID int64) (models.Courier, error)
 	GetCouriers(limit, offset int) ([]models.Courier, error)
@@ -21,11 +21,11 @@ type Storage interface {
 }
 
 type CourierControllerHandler struct {
-	storage Storage
+	service CourierService
 }
 
-func NewCourierControllerHandler(s Storage) *CourierControllerHandler {
-	return &CourierControllerHandler{storage: s}
+func NewCourierControllerHandler(s CourierService) *CourierControllerHandler {
+	return &CourierControllerHandler{service: s}
 }
 
 func (c *CourierControllerHandler) CreateCouriers(ctx echo.Context) error {
@@ -45,7 +45,7 @@ func (c *CourierControllerHandler) CreateCouriers(ctx echo.Context) error {
 			couriers.Couriers[i].CourierID = rand.Int63n(math.MaxInt64)
 		}
 	}
-	errOperation := c.storage.CreateCourier(couriers.Couriers...)
+	errOperation := c.service.CreateCourier(couriers.Couriers...)
 	if errOperation != nil {
 		log.Error(errOperation)
 		return ctx.String(http.StatusBadRequest, errOperation.Error())
@@ -59,7 +59,7 @@ func (c *CourierControllerHandler) GetCourierByID(ctx echo.Context) error {
 		log.Error(errParse)
 		return ctx.String(http.StatusBadRequest, errParse.Error())
 	}
-	courier, errOperation := c.storage.GetCourierByID(id)
+	courier, errOperation := c.service.GetCourierByID(id)
 	if errOperation != nil {
 		log.Error(errOperation)
 		return ctx.String(http.StatusNotFound, errOperation.Error())
@@ -88,7 +88,7 @@ func (c *CourierControllerHandler) GetCouriers(ctx echo.Context) error {
 		log.Error(errOffset)
 		return ctx.String(http.StatusBadRequest, errOffset.Error())
 	}
-	couriers, errOperation := c.storage.GetCouriers(limit, offset)
+	couriers, errOperation := c.service.GetCouriers(limit, offset)
 	if errOperation != nil {
 		log.Error(errOperation)
 		return ctx.String(http.StatusBadRequest, errOperation.Error())
@@ -109,7 +109,7 @@ func (c *CourierControllerHandler) DeleteCourierByID(ctx echo.Context) error {
 		log.Error(errParse)
 		return ctx.String(http.StatusBadRequest, errParse.Error())
 	}
-	errDel := c.storage.DeleteCourierByID(id)
+	errDel := c.service.DeleteCourierByID(id)
 	if errDel != nil {
 		log.Error(errDel)
 		return ctx.String(http.StatusBadRequest, errDel.Error())
@@ -136,7 +136,7 @@ func (c *CourierControllerHandler) CalculateRatingCourier(ctx echo.Context) erro
 		log.Error(errEnd)
 		return ctx.String(http.StatusBadRequest, errEnd.Error())
 	}
-	courier, rating, earning, errOperation := c.storage.CalculateRatingCourier(id, startDate, endDate)
+	courier, rating, earning, errOperation := c.service.CalculateRatingCourier(id, startDate, endDate)
 	if errOperation != nil {
 		log.Error(errEnd)
 		return ctx.String(http.StatusBadRequest, errOperation.Error())
