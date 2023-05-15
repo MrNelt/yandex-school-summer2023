@@ -41,6 +41,10 @@ func (c *CourierControllerHandler) CreateCouriers(ctx echo.Context) error {
 		return ctx.String(http.StatusBadRequest, "bad request")
 	}
 	for i := range couriers.Couriers {
+		courierType := couriers.Couriers[i].CourierType
+		if courierType != "FOOT" && courierType != "BIKE" && courierType != "AUTO" {
+			return ctx.String(http.StatusBadRequest, "bad request")
+		}
 		if couriers.Couriers[i].CourierID == 0 {
 			couriers.Couriers[i].CourierID = rand.Int63n(math.MaxInt64)
 		}

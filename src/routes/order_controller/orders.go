@@ -141,7 +141,10 @@ func (c *OrderControllerHandler) CompleteOrder(ctx echo.Context) error {
 		log.Error(errOperation)
 		return ctx.String(http.StatusBadRequest, errOperation.Error())
 	}
-	return ctx.JSON(http.StatusOK, orders)
+	type answerJson struct {
+		Orders []models.Order `json:"orders"`
+	}
+	return ctx.JSON(http.StatusOK, answerJson{Orders: orders})
 }
 
 func (c *OrderControllerHandler) GetOrdersComplete(ctx echo.Context) error {

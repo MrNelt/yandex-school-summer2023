@@ -2,6 +2,7 @@ version: "3.9"
 
 services:
   tests:
+    container_name: tests
     image: golang:1.20-alpine
     volumes:
       - ./tests:/code

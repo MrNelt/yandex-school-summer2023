@@ -12,11 +12,9 @@ if [ $? -ne 0 ] ; then
   printf "${RED}Docker Compose Failed${NC}\n"
   exit -1
 fi
-TEST_EXIT_CODE=`docker wait ci-tests-1`
-docker logs ci-tests-1
+TEST_EXIT_CODE=`docker wait tests`
+docker logs tests
 if [ -z ${TEST_EXIT_CODE+x} ] || [ "$TEST_EXIT_CODE" -ne 0 ] ; then
-  docker logs ci-web-1
-  docker logs ci-redis-1
   printf "${RED}Tests Failed${NC} - Exit Code: $TEST_EXIT_CODE\n"
 else
   printf "${GREEN}Tests Passed${NC}\n"

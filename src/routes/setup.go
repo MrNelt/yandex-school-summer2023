@@ -18,8 +18,6 @@ func SetupRoutes(e *echo.Echo) {
 
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(10)))
 
-	e.GET("/ping", ping)
-
 	courierController := courier_controller.NewCourierControllerHandler(pg)
 	e.POST("/couriers", courierController.CreateCouriers)
 	e.GET("/couriers/:id", courierController.GetCourierByID)
